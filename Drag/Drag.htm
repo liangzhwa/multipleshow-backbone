@@ -1,0 +1,73 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title></title>
+		<script type="text/javascript" src="js/Drag.js"></script>
+		<link href="css/custom.css" media="all" rel="stylesheet" type="text/css">
+		<script type="text/javascript">
+			var dragGhost;
+			var container;
+			window.onload = function(){
+				dragGhost = document.getElementById("dragGhost");
+				container = document.getElementById("container");
+				var nodes = container.getElementsByTagName("li");
+				for(var i=0;i<nodes.length;i++){
+					var li = nodes[i];
+					if(li.id != "dragGhost"){
+						new dragItem(li);
+					}
+				}
+			}
+			var isIE = document.all;
+
+			function dragItem(item){
+				Drag.init(item,item);
+				item.onDragStart = function(left,top,mouseX,mouseY){
+					this.style.left = findPosX(this);
+					this.style.top = findPosY(this);
+					this.style.position = "absolute";
+					
+					dragGhost.style.display = "block";
+					dragGhost.style.width = isIE?this.offsetWidth:this.offsetWidth - 2;
+					dragGhost.style.height = isIE?this.offsetHeight:this.offsetHeight - 2;
+					this.parentNode.insertBefore(dragGhost,this);
+				}
+				item.onDrag = function(left,top,mouseX,mouseY){
+					var nodes = container.getElementsByTagName("li");
+					var width = this.offsetWidth;
+					var height = this.offsetHeight;
+					
+					for(var i=0;i<nodes.length + 1;i++){
+						if(nodes[i] == null){
+							container.appendChild(dragGhost);
+							break;
+						}
+						if(nodes[i].id == "dragGhost" || nodes[i] == this){
+							continue;
+						}
+						if(mouseX < findPosX(nodes[i]) + width
+						&& mouseY < findPosY(nodes[i]) + height){
+							container.insertBefore(dragGhost,nodes[i]);
+							break;
+						}
+					}
+				}
+				item.onDragEnd = function(left,top,mouseX,mouseY){
+					container.insertBefore(this,dragGhost);
+					this.style.position = "static";
+					this.style.display = "block";
+					dragGhost.style.display = "none";
+				}
+			}
+		</script>
+    </head>
+    <body>
+        <ul id="container">
+			<li>Item1</li>
+			<li>Item2</li>
+			<li>Item3</li>
+			<li>Item4</li>
+			<li>Item5</li>
+			<li id="dragGhost"></li>
+        </ul>
+    </body>
+</html>

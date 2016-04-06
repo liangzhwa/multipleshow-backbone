@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>multipleshow</title>
+	<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.14.custom.css" rel="stylesheet" />
+	<link rel="stylesheet" type="text/css" href="css/pagination.css" />
+	<link rel="stylesheet" type="text/css" href="css/nyroModal.css" media="screen" />
+	<link rel="stylesheet" type="text/css" href="css/jquery.wysiwyg.css" media="screen" />
+	<link rel="stylesheet" type="text/css" href="css/custom.css" />
+	<script type="text/javascript" src="js/jquery.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.14.custom.min.js"></script>
+	<script type="text/javascript" src="js/autoresize.jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery.nyroModal-1.5.5.min.js"></script>
+	<script type="text/javascript" src="js/jquery.pagination.js"></script>
+	<script type="text/javascript" src="js/jquery.wysiwyg.js"></script>
+	<script type="text/javascript" src="js/underscore-1.1.6.js"></script>
+	<script type="text/javascript" src="js/backbone.js"></script>
+	<script type="text/javascript" src="js/backbone-localstorage.js"></script>
+	<script type="text/javascript" src="js/custom-bb.js"></script>
+</head>
+<body>
+	<div id="container">
+		<div id="frametab">
+			<input type='button' value='edit' id='edit' />
+			<input type='button' value='view' id='view' />
+			<div id="content"><br>
+				<div id="chooseAddItem" style=" margin-bottom : 20px ; ">
+					<div id="addAShowWindow" class="nu">Append</div>
+					<div id="saveAllData" onclick="saveAllData()" class="nu">Create</div>
+					<div id="editData" onclick="editData()" class="nu">Update</div>
+					<span id="noticeInfo"></span>
+					<table id="tbDisplay" class="tbDisplay" style="width:100%; height:25px"><tr><td id="tdDisplay">
+					<div id="divTopTitleEdit" class="display" style="text-align:center; font-size:14pt; height:100%" onmouseover='$(this).addClass("editable")' onmouseout='$(this).removeClass("editable")'>(click to add title)</div>
+					<div class="edit" style="text-align: center;"><input id="topTitle" name="topTitle" style='font-size:12pt' size=50></input></div>
+					</td></tr></table>
+				</div>
+				<hr id="showHr_0" size=10 color=#D1E5F4 title="please click and add new item" class="hrClass" style="filter:alpha(opacity=0,finishopacity=100,style=3)"></hr>
+				<div id="blackBlocks">
+				</div>		
+			</div>
+			<div id="displaytab"  style="position:relative;">
+				<div id="displayblocks" style="text-align: center;"></div>
+			</div>
+		</div>
+		
+		<!--   test  -->
+		<div id='testContent'></div>
+	</div>
+
+	<div id="popUp"  style="display:none; width:800px;height:600px;">
+		<div id="Pagination_top" class="pagination"></div>
+		<div id="searchContent" style="width:800px;height:550px"></div>
+		<div id="Pagination_bottom" class="pagination"></div>
+		<div id="hiddenresult" style="display:none;">
+			<div class="result"></div>
+		</div>
+	</div>
+
+	<script type="text/template" id="tpl-item-details">
+	<div class="EditBlock" id="ShowBlock_<%=showBlockCount%>" >
+		<div class="dialog-createNew" id="dialog-createNew" style="display: block;z-index:9999;">
+			<div class="tabsNewClass" id="tabsNew">
+				<ul>
+					<li><a href="#tabs-1">Resource</a></li>
+					<li><a href="#tabs-2">Embed HTML</a></li>
+					<li><a href="#tabs-3">Note</a></li>
+				</ul>
+				<div id="tabs-1">
+					<table style="table-layout: fixed; width: 100%; padding-right:100px;">
+						<tr>
+							<td style='height:10px; width:255px'></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td align='left' colspan=2>
+								<input size='90' class='resourceURL' id='resourceURL' value='<%= resourceContent==""? sourceInputNotice:resourceContent %>' style='font-size:12pt; background-color:silver; color:gray;' onclick='this.style.backgroundColor="white";style.color="black"; if(this.value=="<%= sourceInputNotice %>"){this.value="";}' onblur='if(this.value==""){this.style.backgroundColor="silver";style.color="gray"; this.value="<%= sourceInputNotice %>";}'></input>
+								
+							</td>
+						</tr>
+						<tr style='height:5px'>
+							<td colspan=2></td>
+						</tr>
+						<tr>
+							<td align='left' style='width:255px;'>
+								<select class='searchResource' id='searchResource' style='width:250px; font-size:12pt'>
+									<option value='<%= solrAPI %>'>Crawled OER videos</option>
+									<option value='<%= youtubeAPI %>'>youtube</option>
+								</select>
+							</td>
+							<td align='left'>
+								<div id="searchBtn" class='nu'>
+									<a id='search' href='#popUp' class='nyroModal' onclick='showSearchDialog(this)'>Search</a>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td style='height:1px; width:105px'></td>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+				<div id="tabs-2">
+					<table style="table-layout: fixed; width: 100%; padding-right:100px;">
+						<tr>
+							<td>
+								<textarea rows='5' cols='80' resize='none' style='height: 180px; width:100%; overflow:auto;font-size:12pt;background-color:silver;color:gray;' class='HtmlSourceContent' id='HtmlSourceContent_' onclick='htmlSourceClick(this);' onblur='htmlSourceBlur(this);'><%= embedHtmlContent==""? htmlSourceInputNotice:embedHtmlContent %></textarea>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div id="tabs-3">
+					<table style="table-layout: fixed; width: 100%; padding-right:100px;">
+						<tr>
+							<td>
+								<textarea rows='5' cols='80' resize='none' style='height: 180px; width:100%; overflow:auto;' class='Textcontent' id='Textcontent'><%= noteContent %></textarea>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="oembedDiv" id="oembedDiv_<%=showBlockCount%>" style="display:none"></div>		
+		<div class="commitbtn" id="commitbtn" style="width:60px; ">OK</div>
+		<div class="editbtn" id="editbtn" style="display:none; width:60px;">Edit</div>
+		<div class="deletebtn" id="deletebtn" style="width:60px; ">Delete</div>
+	</div>
+	<hr size=10 color="#D1E5F4" title='<%= hrNotice %>' id="showHr_<%=showBlockCount%>" class="hrClass" style="filter:alpha(opacity=0,finishopacity=100,style=3)"></hr>
+	</script>
+	  <!-- <%= width %>             <%= i %>  <%= topTitle %>-->
+	<script type="text/template" id="tpl-item-display">
+		<table class="tbDisplay" style='width:100%;'> 
+			<tr>
+				<td style='text-align:left;'>
+					<div class="display" id='divTitle' style='font-size:12pt;font-weight:bold;' onmouseover='$(this).addClass("editable")' onmouseout='$(this).removeClass("editable")'><%= title==""? inputContentTitleNotice:title %></div>
+					<div class="edit"><input id="title" name="title" style='font-size:12pt' size=50></input></div>
+				</td>
+			</tr>
+			<tr>
+				<td style='text-align:left;'><div class="DisplayBlock"><%= embed %></div></td>
+			</tr>
+			<tr>
+				<td style='text-align:left;nowrap:false;'>
+					<div id='divDescription' class="display" style='font-size:12pt;line-height:1.5em;' onmouseover='$(this).addClass("editable")' onmouseout='$(this).removeClass("editable")'><%= description==""? inputContentDescriptionNotice:description %></div>
+					<div class="edit"><textarea id='description' name="description" style='font-size:"+fontSize+"; line-height:1.5em;' rows=3 cols=93></textarea></input></div>
+				</td>
+			</tr>
+		</table>
+	</script>	
+
+	<script type="text/template" id="tpl-displayBlock">
+		<div style='font-size:14pt'></div>
+		<hr size=10 color="#D1E5F4" style="filter:alpha(opacity=0,finishopacity=100,style=3)"></hr>
+		<table style='width:100%;'>
+			<tr>
+				<td style='text-align:left;'><div id='divTitle' style='font-size:12pt;font-weight:bold;'><%= title %></div></td>
+			</tr>
+			<tr>
+				<td style='text-align:left;'><div class="DisplayBlock"><%= embed %></div></td>
+			</tr>
+			<tr>
+				<td style='text-align:left;nowrap:false;'><div id='divDescription' style='font-size:12pt;line-height:1.5em;'><%= description %></div></td>
+			</tr>
+		</table>
+	</script>
+	<script type="text/template" id="tpl-resourceEmbed">
+		<iframe src='#URL' style='width:100%;'></iframe>
+	</script>
+	<script type="text/template" id="tpl-imageEmbed">
+		<img src='#URL' ></img>
+	</script>
+	<script type="text/template" id="tpl-noteEmbed">
+		<div style='text-align:left; overflow:scroll;'>#content</div>
+	</script>
+	<script type="text/template" id="tpl-youtubeEmbed">
+		<iframe width="459" height="344" src="http://www.youtube.com/embed/#vId?fs=1&feature=oembed" frameborder="0" allowfullscreen></iframe>
+	</script>
+</body>
+</html>
